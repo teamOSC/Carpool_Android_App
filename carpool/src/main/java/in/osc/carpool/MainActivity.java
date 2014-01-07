@@ -54,14 +54,8 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onNavigationDrawerItemSelected(int position) {
         // BELOW CODE IS JUST FOR NOW
-        if(position == 0) {
-            Log.d("MainActivity", "Position is 0");
-            getSupportFragmentManager().beginTransaction().replace(R.id.container, LocationChooserFragment.newInstance(position +1)).commit();
-        }
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
-                .commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.container, LocationChooserFragment.newInstance(position +1)).commit();
+
     }
 
     public void onSectionAttached(int number) {
