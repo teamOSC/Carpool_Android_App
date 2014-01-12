@@ -21,11 +21,14 @@ import com.google.android.gms.maps.model.LatLng;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -132,17 +135,18 @@ public class LocationChooserFragment extends Fragment {
                     @Override
                     protected Void doInBackground(Void... voids) {
                         try{
-                            HttpClient httpclient = new DefaultHttpClient();
-                            HttpPost httppost = new HttpPost("http://162.243.238.19:5000/add");
-                            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-                            nameValuePairs.add(new BasicNameValuePair("name", "Umair"));
-                            nameValuePairs.add(new BasicNameValuePair("start_arr", start_arr));
-                            nameValuePairs.add(new BasicNameValuePair("dest_arr", dest_arr));
-                            nameValuePairs.add(new BasicNameValuePair("email", userEmail));
-                            httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-
-                            // Execute HTTP Post Request
-                            httpclient.execute(httppost);
+                            HttpClient client = new DefaultHttpClient();
+                            String uri = "http://162.243.238.19:5000/add?";
+                            uri += "name=" + "Umair";
+                            uri += "start_arr=" + start_arr;
+                            uri += "dest_arr=" + dest_arr;
+                            uri += "email" + userEmail;
+                            URI website = new URI(uri);
+                            HttpGet request = new HttpGet();
+                            request.setURI(website);
+                            client.execute(request);
+                        } catch (URISyntaxException e) {
+                            e.printStackTrace();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
