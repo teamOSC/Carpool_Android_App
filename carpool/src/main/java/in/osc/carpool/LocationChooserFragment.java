@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,7 @@ import in.osc.carpool.utils.UserEmailFetcher;
  */
 public class LocationChooserFragment extends Fragment {
 
+    private static View rootView;
     private GoogleMap mMap;
     /**
      * The fragment argument representing the section number for this
@@ -60,7 +62,18 @@ public class LocationChooserFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+
+        if (rootView != null) {
+            ViewGroup parent = (ViewGroup) rootView.getParent();
+            if (parent != null)
+                parent.removeView(rootView);
+        }
+        try {
+            rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        } catch (InflateException e) {
+        /* map is already there, just return view as it is */
+        }
+
         mMap = ((SupportMapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
