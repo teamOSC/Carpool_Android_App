@@ -38,6 +38,8 @@ public class LocationChooserFragment extends Fragment {
 
     private static View rootView;
     private GoogleMap mMap;
+
+    private String start_arr = "", dest_arr = "";
     /**
      * The fragment argument representing the section number for this
      * fragment.
@@ -78,10 +80,9 @@ public class LocationChooserFragment extends Fragment {
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng point) {
-                //TODO: Send selected latlong to server
-                Toast.makeText(getActivity(), "Map clicked!", Toast.LENGTH_SHORT).show();
                 String userEmail = UserEmailFetcher.getEmail(getActivity());
                 new FireMissilesDialogFragment(point, userEmail).show(getActivity().getSupportFragmentManager(), "LocationConfirmDialog");
+
 
             }
         });
@@ -106,49 +107,54 @@ public class LocationChooserFragment extends Fragment {
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
 
-            final HttpClient httpclient = new DefaultHttpClient();
-            final HttpPost httppost = new HttpPost("http://www.yoursite.com/script.php");
-
             // Use the Builder class for convenient dialog construction
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setMessage("Set this as your home or destination?")
                     .setPositiveButton("Home", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            try {
-                                List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-                                nameValuePairs.add(new BasicNameValuePair("latitude", String.valueOf(point.latitude)));
-                                nameValuePairs.add(new BasicNameValuePair("longitude", String.valueOf(point.longitude)));
-                                nameValuePairs.add(new BasicNameValuePair("type", "home"));
-                                nameValuePairs.add(new BasicNameValuePair("email", userEmail));
-                                httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-
-                                // Execute HTTP Post Request
-                                HttpResponse response = httpclient.execute(httppost);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-
+                            start_arr = String.valueOf(point.latitude) + "," + String.valueOf(point.longitude);
                         }
                     })
                     .setNegativeButton("Destination", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            try {
-                                List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-                                nameValuePairs.add(new BasicNameValuePair("latitude", String.valueOf(point.latitude)));
-                                nameValuePairs.add(new BasicNameValuePair("longitude", String.valueOf(point.longitude)));
-                                nameValuePairs.add(new BasicNameValuePair("type", "destination"));
-                                nameValuePairs.add(new BasicNameValuePair("email", userEmail));
-                                httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-
-                                // Execute HTTP Post Request
-                                HttpResponse response = httpclient.execute(httppost);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+                            dest_arr = String.valueOf(point.latitude) + "," + String.valueOf(point.longitude);
                         }
                     });
             // Create the AlertDialog object and return it
             return builder.create();
+        }
+
+        @Override
+        public void onDismiss(DialogInterface dialog) {
+            super.onDismiss(dialog);
+            if(!(start_arr.equals("") || dest_arr.equals(""))) {
+                try {
+                    final HttpClient httpclient = new DefaultHttpClient();
+                    final HttpPost httppost = new HttpPost("http://162.243.238.19:5000/add");
+                    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+                    nameValuePairs.add(new BasicNameValuePair("name", "Umair"));
+                    nameValuePairs.add(new BasicNameValuePair("start_arr", start_arr));
+                    nameValuePairs.add(new BasicNameValuePair("dest_arr", dest_arr));
+                    nameValuePairs.add(new BasicNameValuePair("email", userEmail));
+                    httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+                    // Execute HTTP Post Request
+                    httpclient.execute(httppost);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                if(start_arr.equals("") && dest_arr.equals("")) {
+                    Toast.makeText(getActivity(), "Please select you home and destination.", Toast.LENGTH_SHORT).show();
+                } else {
+                    if(start_arr.equals("")) {
+                        Toast.makeText(getActivity(), "Please select your home.", Toast.LENGTH_SHORT).show();
+                    }
+                    if(dest_arr.equals("")) {
+                        Toast.makeText(getActivity(), "Please select your destination.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
         }
     }
 }
