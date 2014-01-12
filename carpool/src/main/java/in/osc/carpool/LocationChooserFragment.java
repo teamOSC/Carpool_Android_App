@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -17,7 +18,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -82,8 +82,6 @@ public class LocationChooserFragment extends Fragment {
             public void onMapClick(LatLng point) {
                 String userEmail = UserEmailFetcher.getEmail(getActivity());
                 new FireMissilesDialogFragment(point, userEmail).show(getActivity().getSupportFragmentManager(), "LocationConfirmDialog");
-
-
             }
         });
         return rootView;
@@ -128,21 +126,29 @@ public class LocationChooserFragment extends Fragment {
         public void onDismiss(DialogInterface dialog) {
             super.onDismiss(dialog);
             if(!(start_arr.equals("") || dest_arr.equals(""))) {
-                try {
-                    final HttpClient httpclient = new DefaultHttpClient();
-                    final HttpPost httppost = new HttpPost("http://162.243.238.19:5000/add");
-                    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-                    nameValuePairs.add(new BasicNameValuePair("name", "Umair"));
-                    nameValuePairs.add(new BasicNameValuePair("start_arr", start_arr));
-                    nameValuePairs.add(new BasicNameValuePair("dest_arr", dest_arr));
-                    nameValuePairs.add(new BasicNameValuePair("email", userEmail));
-                    httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
-                    // Execute HTTP Post Request
-                    httpclient.execute(httppost);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                new AsyncTask<Void, Void, Void>() {
+
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        try{
+                            HttpClient httpclient = new DefaultHttpClient();
+                            HttpPost httppost = new HttpPost("http://162.243.238.19:5000/add");
+                            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+                            nameValuePairs.add(new BasicNameValuePair("name", "Umair"));
+                            nameValuePairs.add(new BasicNameValuePair("start_arr", start_arr));
+                            nameValuePairs.add(new BasicNameValuePair("dest_arr", dest_arr));
+                            nameValuePairs.add(new BasicNameValuePair("email", userEmail));
+                            httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+                            // Execute HTTP Post Request
+                            httpclient.execute(httppost);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+                    }
+                }.execute();
             } else {
                 if(start_arr.equals("") && dest_arr.equals("")) {
                     Toast.makeText(getActivity(), "Please select you home and destination.", Toast.LENGTH_SHORT).show();
