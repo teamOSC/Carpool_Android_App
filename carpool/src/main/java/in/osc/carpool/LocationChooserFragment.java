@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +19,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -25,6 +28,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.net.URI;
@@ -43,6 +47,8 @@ public class LocationChooserFragment extends Fragment {
     private GoogleMap mMap;
 
     private String start_arr = "", dest_arr = "";
+
+    private static final String TAG = "LocationChooserFragment";
     /**
      * The fragment argument representing the section number for this
      * fragment.
@@ -138,13 +144,18 @@ public class LocationChooserFragment extends Fragment {
                             HttpClient client = new DefaultHttpClient();
                             String uri = "http://162.243.238.19:5000/add?";
                             uri += "name=" + "Umair";
-                            uri += "start_arr=" + start_arr;
-                            uri += "dest_arr=" + dest_arr;
-                            uri += "email" + userEmail;
+                            uri += "&start_arr=" + start_arr;
+                            uri += "&dest_arr=" + dest_arr;
+                            uri += "&email=" + userEmail;
+                            Log.d(TAG, "Making request to this = " + uri);
                             URI website = new URI(uri);
                             HttpGet request = new HttpGet();
                             request.setURI(website);
-                            client.execute(request);
+                            HttpResponse response = client.execute(request);
+                            HttpEntity entity = response.getEntity();
+                            String result = EntityUtils.toString(entity);
+                            //Toast.makeText(getActivity(), result, Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "Response == " + result);
                         } catch (URISyntaxException e) {
                             e.printStackTrace();
                         } catch (IOException e) {
