@@ -31,6 +31,9 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
         </activity>
         <meta-data
             android:name="com.google.android.gms.version"
@@ -38,6 +41,8 @@
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyCJQEnSq0s7roZh3drNwFFbEWWBbyEoQgg"/>
+        <meta-data android:name="android.app.searchable"
+            android:resource="@xml/searchable" />
     </application>
 
 </manifest>
