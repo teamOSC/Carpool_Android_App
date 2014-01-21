@@ -11,6 +11,9 @@ import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.InflateException;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -90,10 +93,29 @@ public class LocationChooserFragment extends Fragment {
             @Override
             public void onMapClick(LatLng point) {
                 String userEmail = UserEmailFetcher.getEmail(getActivity());
-                new FireMissilesDialogFragment(point, userEmail).show(getActivity().getSupportFragmentManager(), "LocationConfirmDialog");
+                new LocationConfirmDialogFragment(point, userEmail).show(getActivity().getSupportFragmentManager(), "LocationConfirmDialog");
             }
         });
         return rootView;
+    }
+
+    @Override
+    public void onActivityCreated (Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        // Indicate that this fragment would like to influence the set of actions in the action bar.
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.location_chooser, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -103,11 +125,11 @@ public class LocationChooserFragment extends Fragment {
                 getArguments().getInt(ARG_SECTION_NUMBER));
     }
 
-    public class FireMissilesDialogFragment extends DialogFragment {
+    public class LocationConfirmDialogFragment extends DialogFragment {
 
         LatLng point;
         String userEmail;
-        public FireMissilesDialogFragment(LatLng point, String userEmail) {
+        public LocationConfirmDialogFragment(LatLng point, String userEmail) {
             this.point = point;
             this.userEmail = userEmail;
         }
