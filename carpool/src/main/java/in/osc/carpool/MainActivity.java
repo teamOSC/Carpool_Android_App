@@ -1,7 +1,7 @@
 package in.osc.carpool;
 
 import android.app.SearchManager;
-import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -9,7 +9,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.SearchView;
+import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -37,6 +37,8 @@ public class MainActivity extends ActionBarActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        handleIntent(getIntent());
     }
 
     @Override
@@ -82,15 +84,6 @@ public class MainActivity extends ActionBarActivity
             // decide what to show in the action bar.
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.main, menu);
-            MenuItem searchItem = menu.findItem(R.id.search);
-            SearchView searchView = (SearchView) searchItem.getActionView();
-
-
-            SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-            if(null!=searchManager ) {
-                searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-            }
-            searchView.setIconifiedByDefault(false);
             restoreActionBar();
             return true;
         }
@@ -107,5 +100,20 @@ public class MainActivity extends ActionBarActivity
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        handleIntent(intent);
+    }
+
+    private void handleIntent(Intent intent) {
+
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            //use the query to search your data somehow
+            Toast.makeText(getApplicationContext(), query, Toast.LENGTH_SHORT).show();
+            //TODO: Use the query to take the user to the actual place in map
+        }
     }
 }
