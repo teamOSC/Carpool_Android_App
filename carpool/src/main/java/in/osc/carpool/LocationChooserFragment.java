@@ -6,10 +6,14 @@ import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.InflateException;
@@ -21,33 +25,31 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 
+import in.osc.carpool.utils.PlaceProvider;
 import in.osc.carpool.utils.UserEmailFetcher;
 
 /**
  * Created by omerjerk on 5/1/14.
  */
-public class LocationChooserFragment extends Fragment {
+public class LocationChooserFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static View rootView;
     private GoogleMap mMap;
@@ -120,6 +122,7 @@ public class LocationChooserFragment extends Fragment {
         if(null!=searchManager ) {
             searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
         }
+        searchView.setQueryHint("Search...");
         searchView.setIconifiedByDefault(false);
         super.onCreateOptionsMenu(menu, inflater);
     }
@@ -135,6 +138,57 @@ public class LocationChooserFragment extends Fragment {
         super.onAttach(activity);
         ((MainActivity) activity).onSectionAttached(
                 getArguments().getInt(ARG_SECTION_NUMBER));
+    }
+
+    public void performSearch(String query) {
+        Log.d(TAG, "performSearch() called");
+        Bundle data = new Bundle();
+        data.putString("query", query);
+        getActivity().getSupportLoaderManager().restartLoader(0, data, this);
+    }
+
+    public void getPlace(String query){
+        Bundle data = new Bundle();
+        data.putString("query", query);
+        getActivity().getSupportLoaderManager().restartLoader(1, data, this);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int arg0, Bundle query) {
+        CursorLoader cLoader = null;
+        if(arg0==0) {
+            Log.d(TAG, "inside onCreate() Loader = " + query.getString("query"));
+            cLoader = new CursorLoader(getActivity(), PlaceProvider.SEARCH_URI, null, null, new String[]{ query.getString("query") }, null);
+        } else if(arg0==1)
+            cLoader = new CursorLoader(getActivity(), PlaceProvider.DETAILS_URI, null, null, new String[]{ query.getString("query") }, null);
+        return cLoader;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> arg0, Cursor c) {
+        showLocations(c);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> arg0) {
+        // TODO Auto-generated method stub
+    }
+
+    private void showLocations(Cursor c){
+        MarkerOptions markerOptions;
+        LatLng position = null;
+        mMap.clear();
+        while(c.moveToNext()){
+            markerOptions = new MarkerOptions();
+            position = new LatLng(Double.parseDouble(c.getString(1)),Double.parseDouble(c.getString(2)));
+            markerOptions.position(position);
+            markerOptions.title(c.getString(0));
+            mMap.addMarker(markerOptions);
+        }
+        if(position!=null){
+            CameraUpdate cameraPosition = CameraUpdateFactory.newLatLng(position);
+            mMap.animateCamera(cameraPosition);
+        }
     }
 
     public class LocationConfirmDialogFragment extends DialogFragment {

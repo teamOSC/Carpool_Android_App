@@ -2,4 +2,9 @@
 
 <searchable xmlns:android="http://schemas.android.com/apk/res/android"
     android:label="@string/app_name"
-    android:hint="Search" />
+    android:hint="Search"
+
+    android:searchSuggestAuthority="in.osc.carpool.utils.PlaceProvider"
+    android:searchSuggestIntentAction="android.intent.action.VIEW"
+    android:searchSuggestSelection=" ?"
+    android:searchSuggestThreshold="2" />

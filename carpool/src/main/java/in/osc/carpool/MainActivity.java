@@ -2,7 +2,10 @@ package in.osc.carpool;
 
 import android.app.SearchManager;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -10,6 +13,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
+
+import in.osc.carpool.utils.PlaceProvider;
 
 public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -104,16 +109,24 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
         handleIntent(intent);
     }
 
     private void handleIntent(Intent intent) {
 
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+        LocationChooserFragment mLocationChooserFragment = (LocationChooserFragment) getSupportFragmentManager().findFragmentById(R.id.container);
+        if (intent.getAction().equals(Intent.ACTION_SEARCH)) {
             String query = intent.getStringExtra(SearchManager.QUERY);
             //use the query to search your data somehow
             Toast.makeText(getApplicationContext(), query, Toast.LENGTH_SHORT).show();
+            mLocationChooserFragment.performSearch(intent.getStringExtra(SearchManager.QUERY));
             //TODO: Use the query to take the user to the actual place in map
+        } else if (intent.getAction().equals(Intent.ACTION_VIEW)) {
+            mLocationChooserFragment.getPlace(SearchManager.EXTRA_DATA_KEY);
         }
     }
+
+
 }
