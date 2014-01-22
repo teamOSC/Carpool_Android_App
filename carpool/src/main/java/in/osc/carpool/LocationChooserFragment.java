@@ -187,7 +187,7 @@ public class LocationChooserFragment extends Fragment implements LoaderManager.L
             mMap.addMarker(markerOptions);
         }
         if(position!=null){
-            CameraUpdate cameraPosition = CameraUpdateFactory.newLatLng(position);
+            CameraUpdate cameraPosition = CameraUpdateFactory.newLatLngZoom(position, 12.0f);
             mMap.animateCamera(cameraPosition);
         }
     }
