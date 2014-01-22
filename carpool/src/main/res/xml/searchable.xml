@@ -7,4 +7,4 @@
     android:searchSuggestAuthority="in.osc.carpool.utils.PlaceProvider"
     android:searchSuggestIntentAction="android.intent.action.VIEW"
     android:searchSuggestSelection=" ?"
-    android:searchSuggestThreshold="2" />
+    android:searchSuggestThreshold="3" />

@@ -78,6 +78,10 @@ public class PlaceProvider extends ContentProvider {
 
         MatrixCursor mCursor = null;
 
+        for(String derp : selectionArgs) {
+            Log.d(TAG, "Selection Args = " + derp + "   " + selection);
+        }
+
         switch(mUriMatcher.match(uri)){
             case SEARCH:
                 // Defining a cursor object with columns description, lat and lng
@@ -140,7 +144,7 @@ public class PlaceProvider extends ContentProvider {
 
                     // Creating cursor object with places
                     for(int i=0;i<list.size();i++){
-                        HashMap<String, String> hMap = (HashMap<String, String>) list.get(i);
+                        HashMap<String, String> hMap = list.get(i);
 
                         // Adding place details to cursor
                         mCursor.addRow(new String[] { Integer.toString(i), hMap.get("description"), hMap.get("reference") });
@@ -243,7 +247,7 @@ public class PlaceProvider extends ContentProvider {
             urlConnection.disconnect();
         }
 
-        Log.d(TAG, "Result of downloadUTL() = " + data);
+        Log.d(TAG, "Result of downloadURL() = " + data);
         return data;
     }
 
@@ -251,19 +255,20 @@ public class PlaceProvider extends ContentProvider {
 
         Log.d(TAG, "getPlaceDetailsUrl() ref = " + ref);
         // reference of place
-        String reference = "input="+ref;
+        String reference = "reference="+ref;
 
         // Sensor enabled
         String sensor = "sensor=false";
 
         // Building the parameters to the web service
-        String parameters = reference+"&"+sensor+"&"+mKey;
+        String parameters = reference+"&"+sensor+"&key="+mKey;
 
         // Output format
         String output = "json";
 
         // Building the url to the web service
         String url = "https://maps.googleapis.com/maps/api/place/details/"+output+"?"+parameters;
+        Log.d(TAG, "getPlaceDetailsUrl() = " + url);
 
         return url;
     }

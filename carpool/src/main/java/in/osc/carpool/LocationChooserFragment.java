@@ -157,10 +157,11 @@ public class LocationChooserFragment extends Fragment implements LoaderManager.L
     public Loader<Cursor> onCreateLoader(int arg0, Bundle query) {
         CursorLoader cLoader = null;
         if(arg0==0) {
-            Log.d(TAG, "inside onCreate() Loader = " + query.getString("query"));
             cLoader = new CursorLoader(getActivity(), PlaceProvider.SEARCH_URI, null, null, new String[]{ query.getString("query") }, null);
-        } else if(arg0==1)
+        } else if(arg0==1) {
+            Log.d(TAG, "onCreateLoader() = " + query.getString("query"));
             cLoader = new CursorLoader(getActivity(), PlaceProvider.DETAILS_URI, null, null, new String[]{ query.getString("query") }, null);
+        }
         return cLoader;
     }
 

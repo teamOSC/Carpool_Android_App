@@ -119,12 +119,9 @@ public class MainActivity extends ActionBarActivity
         LocationChooserFragment mLocationChooserFragment = (LocationChooserFragment) getSupportFragmentManager().findFragmentById(R.id.container);
         if (intent.getAction().equals(Intent.ACTION_SEARCH)) {
             String query = intent.getStringExtra(SearchManager.QUERY);
-            //use the query to search your data somehow
-            Toast.makeText(getApplicationContext(), query, Toast.LENGTH_SHORT).show();
             mLocationChooserFragment.performSearch(intent.getStringExtra(SearchManager.QUERY));
-            //TODO: Use the query to take the user to the actual place in map
         } else if (intent.getAction().equals(Intent.ACTION_VIEW)) {
-            mLocationChooserFragment.getPlace(SearchManager.EXTRA_DATA_KEY);
+            mLocationChooserFragment.getPlace(intent.getStringExtra(SearchManager.EXTRA_DATA_KEY));
         }
     }
 
