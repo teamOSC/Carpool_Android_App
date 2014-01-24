@@ -72,12 +72,17 @@ public class CarpoolSearchFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         // If the drawer is open, show the global app actions in the action bar. See also
         // showGlobalContextActionBar, which controls the top-left area of the action bar.
-        inflater.inflate(R.menu.global, menu);
+        inflater.inflate(R.menu.carpool_search, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
+
+        if(item.getItemId() == R.id.refresh_carpool_database) {
+            new RefreshCarpoolDatabase().execute();
+        }
 
         return super.onOptionsItemSelected(item);
     }
