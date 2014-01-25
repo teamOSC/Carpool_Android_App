@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -42,6 +43,7 @@ import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 
 import in.osc.carpool.utils.PlaceProvider;
 import in.osc.carpool.utils.UserEmailFetcher;
@@ -54,7 +56,7 @@ public class LocationChooserFragment extends Fragment implements LoaderManager.L
     private static View rootView;
     private GoogleMap mMap;
 
-    private String start_arr = "", dest_arr = "";
+    private String start_lat = "", start_lon = "", dest_lat = "", dest_lon = "";
 
     private static final String TAG = "LocationChooserFragment";
     /**
@@ -187,7 +189,7 @@ public class LocationChooserFragment extends Fragment implements LoaderManager.L
             mMap.addMarker(markerOptions);
         }
         if(position!=null){
-            CameraUpdate cameraPosition = CameraUpdateFactory.newLatLngZoom(position, 12.0f);
+            CameraUpdate cameraPosition = CameraUpdateFactory.newLatLngZoom(position, 13.0f);
             mMap.animateCamera(cameraPosition);
         }
     }
@@ -208,12 +210,14 @@ public class LocationChooserFragment extends Fragment implements LoaderManager.L
             builder.setMessage("Set this as your home or destination?")
                     .setPositiveButton("Home", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            start_arr = String.valueOf(point.latitude) + "," + String.valueOf(point.longitude);
+                            start_lat = String.valueOf(point.latitude);
+                            start_lon = String.valueOf(point.longitude);
                         }
                     })
                     .setNegativeButton("Destination", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            dest_arr = String.valueOf(point.latitude) + "," + String.valueOf(point.longitude);
+                            dest_lat = String.valueOf(point.latitude);
+                            dest_lon = String.valueOf(point.longitude);
                         }
                     });
             // Create the AlertDialog object and return it
@@ -223,19 +227,30 @@ public class LocationChooserFragment extends Fragment implements LoaderManager.L
         @Override
         public void onDismiss(DialogInterface dialog) {
             super.onDismiss(dialog);
-            if(!(start_arr.equals("") || dest_arr.equals(""))) {
+            if(!(start_lat.equals("") || dest_lat.equals(""))) {
 
                 new AsyncTask<Void, Void, Void>() {
 
                     @Override
                     protected Void doInBackground(Void... voids) {
                         try{
+                            //write the location coordiantes to SharedPreferences
+                            SharedPreferences settings = getActivity().getSharedPreferences("MAIN", 0);
+                            SharedPreferences.Editor editor = settings.edit();
+                            editor.putString("start_latitude", start_lat);
+                            editor.putString("start_longitude", start_lon);
+                            editor.putString("dest_latitude", dest_lat);
+                            editor.putString("dest_longitude", dest_lon);
+                            editor.commit();
+
+                            //make an http get request
                             HttpClient client = new DefaultHttpClient();
                             String uri = "http://162.243.238.19:5000/add?";
-                            uri += "name=" + "Umair";
-                            uri += "&start_arr=" + start_arr;
-                            uri += "&dest_arr=" + dest_arr;
+                            uri += "name=" + "Umairs";
+                            uri += "&start_arr=" + start_lat + "," + start_lon;
+                            uri += "&dest_arr=" + dest_lat + "," + dest_lon;
                             uri += "&email=" + userEmail;
+                            uri = URLEncoder.encode(uri, "UTF-8");
                             Log.d(TAG, "Making request to this = " + uri);
                             URI website = new URI(uri);
                             HttpGet request = new HttpGet();
@@ -254,13 +269,13 @@ public class LocationChooserFragment extends Fragment implements LoaderManager.L
                     }
                 }.execute();
             } else {
-                if(start_arr.equals("") && dest_arr.equals("")) {
+                if(start_lat.equals("") && dest_lat.equals("")) {
                     Toast.makeText(getActivity(), "Please select you home and destination.", Toast.LENGTH_SHORT).show();
                 } else {
-                    if(start_arr.equals("")) {
+                    if(start_lat.equals("")) {
                         Toast.makeText(getActivity(), "Please select your home.", Toast.LENGTH_SHORT).show();
                     }
-                    if(dest_arr.equals("")) {
+                    if(dest_lat.equals("")) {
                         Toast.makeText(getActivity(), "Please select your destination.", Toast.LENGTH_SHORT).show();
                     }
                 }
