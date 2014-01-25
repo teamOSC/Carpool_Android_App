@@ -58,6 +58,8 @@ public class LocationChooserFragment extends Fragment implements LoaderManager.L
 
     private String start_lat = "", start_lon = "", dest_lat = "", dest_lon = "";
 
+    private Context context;
+
     private static final String TAG = "LocationChooserFragment";
     /**
      * The fragment argument representing the section number for this
@@ -94,6 +96,8 @@ public class LocationChooserFragment extends Fragment implements LoaderManager.L
         } catch (InflateException e) {
         /* map is already there, just return view as it is */
         }
+
+        context = getActivity();
 
         mMap = ((SupportMapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
@@ -234,23 +238,14 @@ public class LocationChooserFragment extends Fragment implements LoaderManager.L
                     @Override
                     protected Void doInBackground(Void... voids) {
                         try{
-                            //write the location coordiantes to SharedPreferences
-                            SharedPreferences settings = getActivity().getSharedPreferences("MAIN", 0);
-                            SharedPreferences.Editor editor = settings.edit();
-                            editor.putString("start_latitude", start_lat);
-                            editor.putString("start_longitude", start_lon);
-                            editor.putString("dest_latitude", dest_lat);
-                            editor.putString("dest_longitude", dest_lon);
-                            editor.commit();
 
                             //make an http get request
                             HttpClient client = new DefaultHttpClient();
                             String uri = "http://162.243.238.19:5000/add?";
-                            uri += "name=" + "Umairs";
-                            uri += "&start_arr=" + start_lat + "," + start_lon;
-                            uri += "&dest_arr=" + dest_lat + "," + dest_lon;
-                            uri += "&email=" + userEmail;
-                            uri = URLEncoder.encode(uri, "UTF-8");
+                            uri += URLEncoder.encode("name=" + "Umairs", "UTF-8");
+                            uri += URLEncoder.encode("&start_arr=" + start_lat + "," + start_lon, "UTF-8");;
+                            uri += URLEncoder.encode("&dest_arr=" + dest_lat + "," + dest_lon, "UTF-8");
+                            uri += URLEncoder.encode("&email=" + userEmail, "UTF-8");
                             Log.d(TAG, "Making request to this = " + uri);
                             URI website = new URI(uri);
                             HttpGet request = new HttpGet();
@@ -266,6 +261,19 @@ public class LocationChooserFragment extends Fragment implements LoaderManager.L
                             e.printStackTrace();
                         }
                         return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Void v) {
+
+                        //write the location coordiantes to SharedPreferences
+                        SharedPreferences settings = context.getSharedPreferences("MAIN", 0);
+                        SharedPreferences.Editor editor = settings.edit();
+                        editor.putString("start_latitude", start_lat);
+                        editor.putString("start_longitude", start_lon);
+                        editor.putString("dest_latitude", dest_lat);
+                        editor.putString("dest_longitude", dest_lon);
+                        editor.commit();
                     }
                 }.execute();
             } else {
