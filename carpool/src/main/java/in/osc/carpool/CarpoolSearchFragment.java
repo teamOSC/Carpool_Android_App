@@ -1,6 +1,8 @@
 package in.osc.carpool;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -20,19 +22,26 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 
 /**
  * Created by omerjerk on 12/1/14.
  */
 public class CarpoolSearchFragment extends Fragment {
 
+    private static final String TAG = "CarpoolSearchFragment";
     /**
      * The fragment argument representing the section number for this
      * fragment.
@@ -58,6 +67,7 @@ public class CarpoolSearchFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_search_carpool, container, false);
+        new CalculateCarpools().execute();
         return rootView;
     }
 
@@ -92,6 +102,59 @@ public class CarpoolSearchFragment extends Fragment {
         super.onAttach(activity);
         ((MainActivity) activity).onSectionAttached(
                 getArguments().getInt(ARG_SECTION_NUMBER));
+    }
+
+    private class CalculateCarpools extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            String jsonString;
+
+            try {
+                File cacheFile = new File(getActivity().getFilesDir(), "data.json");
+
+                BufferedReader br = new BufferedReader(new FileReader(cacheFile));
+                jsonString = br.readLine();
+                Log.d(TAG, "json output = " + jsonString);
+
+                JSONArray mJsonArray = new JSONArray(jsonString);
+
+                ArrayList<JSONObject> dataList = new ArrayList<JSONObject>();
+                for(int i =0; i < mJsonArray.length(); ++i) {
+                    JSONObject mJsonObject = mJsonArray.getJSONObject(i);
+                    dataList.add(mJsonObject);
+                }
+
+                for (JSONObject mJSONObject : dataList) {
+                    String[] friendStartPos = mJSONObject.getString("start_arr").split(",");
+                    String[] friendDestPos = mJSONObject.getString("dest_arr").split(",");
+                    SharedPreferences settings = getActivity().getSharedPreferences("MAIN", 0);
+                    double homeStartLat = Double.parseDouble(settings.getString("start_latitude", "0.0"));
+                    double homeStartLon = Double.parseDouble(settings.getString("start_longitude", "0.0"));
+                    double homeDestLat = Double.parseDouble(settings.getString("dest_latitude", "0.0"));
+                    double homeDestLon = Double.parseDouble(settings.getString("dest_longitude", "0.0"));
+                    float[] distanceBetweenStart = new float[1];
+                    float[] distanceBetweenDest = new float[1];
+                    Location.distanceBetween(Double.parseDouble(friendStartPos[0]),
+                            Double.parseDouble(friendStartPos[1]),
+                            homeStartLat, homeStartLon, distanceBetweenStart);
+                    Location.distanceBetween(Double.parseDouble(friendDestPos[0]),
+                            Double.parseDouble(friendDestPos[1]),
+                            homeDestLat, homeDestLon, distanceBetweenDest);
+
+                    Log.d(TAG, "distanceBetweenStart = " + distanceBetweenStart[0]);
+                    Log.d(TAG, "distanceBetweenDest = " + distanceBetweenDest[0]);
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
     }
 
     private class RefreshCarpoolDatabase extends AsyncTask<Void, Void, String> {
@@ -135,7 +198,7 @@ public class CarpoolSearchFragment extends Fragment {
                 bw = new BufferedWriter(fw);
                 bw.write(result);
 
-                Toast.makeText(getActivity(), "Latest Coupon codes downloaded !", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Carpools Refreshed!", Toast.LENGTH_SHORT).show();
 
             } catch (Exception e){
                 e.printStackTrace();
