@@ -143,15 +143,20 @@ public class CarpoolSearchFragment extends Fragment {
                             Double.parseDouble(friendDestPos[1]),
                             homeDestLat, homeDestLon, distanceBetweenDest);
 
-                    Log.d(TAG, "distanceBetweenStart = " + distanceBetweenStart[0]);
-                    Log.d(TAG, "distanceBetweenDest = " + distanceBetweenDest[0]);
+                    Log.d(TAG, "distanceBetweenStart = " + distanceBetweenStart[0]/1000 + " km");
+                    Log.d(TAG, "distanceBetweenDest = " + distanceBetweenDest[0]/1000 + " km");
                 }
 
-            } catch (IOException e) {
+            } catch (Exception e) {
+                new RefreshCarpoolDatabase() {
+                    @Override
+                    protected void onPostExecute (String result) {
+                        super.onPostExecute(result);
+                        new CalculateCarpools().execute();
+                    }
+                }.execute();
                 e.printStackTrace();
 
-            } catch (JSONException e) {
-                e.printStackTrace();
             }
             return null;
         }
