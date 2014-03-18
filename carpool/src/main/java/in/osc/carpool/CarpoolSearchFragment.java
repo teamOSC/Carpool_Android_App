@@ -1,6 +1,7 @@
 package in.osc.carpool;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.AsyncTask;
@@ -13,6 +14,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.http.HttpEntity;
@@ -23,7 +27,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -145,6 +148,7 @@ public class CarpoolSearchFragment extends Fragment {
 
                     Log.d(TAG, "distanceBetweenStart = " + distanceBetweenStart[0]/1000 + " km");
                     Log.d(TAG, "distanceBetweenDest = " + distanceBetweenDest[0]/1000 + " km");
+
                 }
 
             } catch (Exception e) {
@@ -217,6 +221,53 @@ public class CarpoolSearchFragment extends Fragment {
                 }
 
             }
+        }
+    }
+
+    private static class GoogleCardsAdapter extends BaseAdapter {
+
+        private Context mContext;
+
+        public GoogleCardsAdapter(Context context) {
+            mContext = context;
+        }
+
+        @Override
+        public long getItemId (int pos) {
+            return pos;
+        }
+
+        @Override
+        public Object getItem (int pos) {
+            return null;
+        }
+
+        @Override
+        public int getCount () {
+            return 5;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder viewHolder;
+            View view = convertView;
+            if (view == null) {
+                view = LayoutInflater.from(mContext).inflate(R.layout.googlecards_card, parent, false);
+
+                viewHolder = new ViewHolder();
+                viewHolder.textView = (TextView) view.findViewById(R.id.activity_googlecards_card_textview);
+                view.setTag(viewHolder);
+            } else {
+                viewHolder = (ViewHolder) view.getTag();
+            }
+
+            viewHolder.textView.setText("This is card " + (getItemId(position) + 1));
+
+            return view;
+        }
+
+        private static class ViewHolder {
+            TextView textView;
         }
     }
 }
