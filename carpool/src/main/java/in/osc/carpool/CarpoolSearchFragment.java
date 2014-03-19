@@ -143,7 +143,7 @@ public class CarpoolSearchFragment extends Fragment {
                 }
 
                 for (JSONObject mJSONObject : dataList) {
-                    if (mJSONObject.getString("email").equals(UserEmailFetcher.getEmail(getActivity()))) {
+                    if (!mJSONObject.getString("email").equals(UserEmailFetcher.getEmail(getActivity()))) {
                         String[] friendStartPos = mJSONObject.getString("start_arr").split(",");
                         String[] friendDestPos = mJSONObject.getString("dest_arr").split(",");
                         SharedPreferences settings = getActivity().getSharedPreferences("MAIN", 0);
