@@ -29,7 +29,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -121,6 +123,7 @@ public class CarpoolSearchFragment extends Fragment {
 
         List<Float> startDistances = new ArrayList<Float>();
         List<Float> endDistances = new ArrayList<Float>();
+        ArrayList<JSONObject> dataList = new ArrayList<JSONObject>();
 
         @Override
         protected Void doInBackground(Void... voids) {
@@ -136,7 +139,6 @@ public class CarpoolSearchFragment extends Fragment {
 
                 JSONArray mJsonArray = new JSONArray(jsonString);
 
-                ArrayList<JSONObject> dataList = new ArrayList<JSONObject>();
                 for(int i =0; i < mJsonArray.length(); ++i) {
                     JSONObject mJsonObject = mJsonArray.getJSONObject(i);
                     dataList.add(mJsonObject);
@@ -175,7 +177,6 @@ public class CarpoolSearchFragment extends Fragment {
                     }
                 }.execute();
                 e.printStackTrace();
-
             }
             return null;
         }
@@ -184,7 +185,7 @@ public class CarpoolSearchFragment extends Fragment {
         protected void onPostExecute (Void v) {
             ListView cardsList = (ListView) rootView.findViewById(R.id.googlecards_listview);
             SwingBottomInAnimationAdapter swingBottomInAnimationAdapter =
-                    new SwingBottomInAnimationAdapter(new GoogleCardsAdapter(getActivity(), startDistances, endDistances));
+                    new SwingBottomInAnimationAdapter(new GoogleCardsAdapter(getActivity(), startDistances, endDistances, dataList));
             swingBottomInAnimationAdapter.setInitialDelayMillis(300);
             swingBottomInAnimationAdapter.setAbsListView(cardsList);
             cardsList.setAdapter(swingBottomInAnimationAdapter);
@@ -254,11 +255,13 @@ public class CarpoolSearchFragment extends Fragment {
         private Context mContext;
         private List<Float> startDistances;
         private List<Float> endDistances;
+        private List<JSONObject> dataList;
 
-        public GoogleCardsAdapter(Context context, List<Float> startDistances, List<Float> endDistances) {
+        public GoogleCardsAdapter(Context context, List<Float> startDistances, List<Float> endDistances, List<JSONObject> dataList) {
             mContext = context;
             this.startDistances = startDistances;
             this.endDistances = endDistances;
+            this.dataList = dataList;
         }
 
         @Override
@@ -286,13 +289,19 @@ public class CarpoolSearchFragment extends Fragment {
                 viewHolder = new ViewHolder();
                 viewHolder.startdistanceTextView = (TextView) view.findViewById(R.id.start_distance_textview);
                 viewHolder.endDistanceTextView = (TextView) view.findViewById(R.id.end_distance_textview);
+                viewHolder.emailTextView = (TextView) view.findViewById(R.id.email_textview);
                 view.setTag(viewHolder);
             } else {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
-            viewHolder.startdistanceTextView.setText("Distance between start " + startDistances.get(position));
-            viewHolder.endDistanceTextView.setText("Distance between ends" + endDistances.get(position));
+            viewHolder.startdistanceTextView.setText("Diff b/w start : " + startDistances.get(position) + " km");
+            viewHolder.endDistanceTextView.setText("Diff b/w start : " + endDistances.get(position) + " km");
+            try {
+                viewHolder.emailTextView.setText("Email : " + dataList.get(position).getString("email"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
             return view;
         }
@@ -300,6 +309,7 @@ public class CarpoolSearchFragment extends Fragment {
         private static class ViewHolder {
             TextView startdistanceTextView;
             TextView endDistanceTextView;
+            TextView emailTextView;
         }
     }
 }
