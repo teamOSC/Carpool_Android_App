@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-</LinearLayout>
+<ListView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/googlecards_listview"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#e2e2e2"
+    android:clipToPadding="false"
+    android:divider="@null"
+    android:dividerHeight="16dp"
+    android:fadingEdge="none"
+    android:padding="16dp"
+    android:layout_marginTop="5dp"
+    android:scrollbarStyle="outsideOverlay" />

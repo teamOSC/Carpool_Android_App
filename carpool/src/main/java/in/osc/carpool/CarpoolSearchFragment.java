@@ -5,8 +5,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.AsyncTask;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -15,9 +15,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.haarman.listviewanimations.swinginadapters.prepared.SwingBottomInAnimationAdapter;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -38,6 +40,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.List;
+
+import in.osc.carpool.utils.UserEmailFetcher;
 
 /**
  * Created by omerjerk on 12/1/14.
@@ -50,6 +55,11 @@ public class CarpoolSearchFragment extends Fragment {
      * fragment.
      */
     private static final String ARG_SECTION_NUMBER = "section_number";
+
+    /**
+     * The root view of the fragment shown
+     */
+    View rootView;
 
     /**
      * Returns a new instance of this fragment for the given section
@@ -69,7 +79,7 @@ public class CarpoolSearchFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_search_carpool, container, false);
+        rootView = inflater.inflate(R.layout.fragment_search_carpool, container, false);
         new CalculateCarpools().execute();
         return rootView;
     }
@@ -109,6 +119,9 @@ public class CarpoolSearchFragment extends Fragment {
 
     private class CalculateCarpools extends AsyncTask<Void, Void, Void> {
 
+        List<Float> startDistances = new ArrayList<Float>();
+        List<Float> endDistances = new ArrayList<Float>();
+
         @Override
         protected Void doInBackground(Void... voids) {
 
@@ -130,25 +143,27 @@ public class CarpoolSearchFragment extends Fragment {
                 }
 
                 for (JSONObject mJSONObject : dataList) {
-                    String[] friendStartPos = mJSONObject.getString("start_arr").split(",");
-                    String[] friendDestPos = mJSONObject.getString("dest_arr").split(",");
-                    SharedPreferences settings = getActivity().getSharedPreferences("MAIN", 0);
-                    double homeStartLat = Double.parseDouble(settings.getString("start_latitude", "0.0"));
-                    double homeStartLon = Double.parseDouble(settings.getString("start_longitude", "0.0"));
-                    double homeDestLat = Double.parseDouble(settings.getString("dest_latitude", "0.0"));
-                    double homeDestLon = Double.parseDouble(settings.getString("dest_longitude", "0.0"));
-                    float[] distanceBetweenStart = new float[1];
-                    float[] distanceBetweenDest = new float[1];
-                    Location.distanceBetween(Double.parseDouble(friendStartPos[0]),
-                            Double.parseDouble(friendStartPos[1]),
-                            homeStartLat, homeStartLon, distanceBetweenStart);
-                    Location.distanceBetween(Double.parseDouble(friendDestPos[0]),
-                            Double.parseDouble(friendDestPos[1]),
-                            homeDestLat, homeDestLon, distanceBetweenDest);
-
-                    Log.d(TAG, "distanceBetweenStart = " + distanceBetweenStart[0]/1000 + " km");
-                    Log.d(TAG, "distanceBetweenDest = " + distanceBetweenDest[0]/1000 + " km");
-
+                    if (mJSONObject.getString("email").equals(UserEmailFetcher.getEmail(getActivity()))) {
+                        String[] friendStartPos = mJSONObject.getString("start_arr").split(",");
+                        String[] friendDestPos = mJSONObject.getString("dest_arr").split(",");
+                        SharedPreferences settings = getActivity().getSharedPreferences("MAIN", 0);
+                        double homeStartLat = Double.parseDouble(settings.getString("start_latitude", "0.0"));
+                        double homeStartLon = Double.parseDouble(settings.getString("start_longitude", "0.0"));
+                        double homeDestLat = Double.parseDouble(settings.getString("dest_latitude", "0.0"));
+                        double homeDestLon = Double.parseDouble(settings.getString("dest_longitude", "0.0"));
+                        float[] distanceBetweenStart = new float[1];
+                        float[] distanceBetweenDest = new float[1];
+                        Location.distanceBetween(Double.parseDouble(friendStartPos[0]),
+                                Double.parseDouble(friendStartPos[1]),
+                                homeStartLat, homeStartLon, distanceBetweenStart);
+                        Location.distanceBetween(Double.parseDouble(friendDestPos[0]),
+                                Double.parseDouble(friendDestPos[1]),
+                                homeDestLat, homeDestLon, distanceBetweenDest);
+                        startDistances.add(distanceBetweenStart[0] / 1000);
+                        endDistances.add(distanceBetweenDest[0]/1000);
+                        Log.d(TAG, "distanceBetweenStart = " + distanceBetweenStart[0]/1000 + " km");
+                        Log.d(TAG, "distanceBetweenDest = " + distanceBetweenDest[0]/1000 + " km");
+                    }
                 }
 
             } catch (Exception e) {
@@ -163,6 +178,16 @@ public class CarpoolSearchFragment extends Fragment {
 
             }
             return null;
+        }
+
+        @Override
+        protected void onPostExecute (Void v) {
+            ListView cardsList = (ListView) rootView.findViewById(R.id.googlecards_listview);
+            SwingBottomInAnimationAdapter swingBottomInAnimationAdapter =
+                    new SwingBottomInAnimationAdapter(new GoogleCardsAdapter(getActivity(), startDistances, endDistances));
+            swingBottomInAnimationAdapter.setInitialDelayMillis(300);
+            swingBottomInAnimationAdapter.setAbsListView(cardsList);
+            cardsList.setAdapter(swingBottomInAnimationAdapter);
         }
     }
 
@@ -227,9 +252,13 @@ public class CarpoolSearchFragment extends Fragment {
     private static class GoogleCardsAdapter extends BaseAdapter {
 
         private Context mContext;
+        private List<Float> startDistances;
+        private List<Float> endDistances;
 
-        public GoogleCardsAdapter(Context context) {
+        public GoogleCardsAdapter(Context context, List<Float> startDistances, List<Float> endDistances) {
             mContext = context;
+            this.startDistances = startDistances;
+            this.endDistances = endDistances;
         }
 
         @Override
@@ -244,7 +273,7 @@ public class CarpoolSearchFragment extends Fragment {
 
         @Override
         public int getCount () {
-            return 5;
+            return startDistances.size();
         }
 
         @Override
@@ -255,19 +284,22 @@ public class CarpoolSearchFragment extends Fragment {
                 view = LayoutInflater.from(mContext).inflate(R.layout.googlecards_card, parent, false);
 
                 viewHolder = new ViewHolder();
-                viewHolder.textView = (TextView) view.findViewById(R.id.activity_googlecards_card_textview);
+                viewHolder.startdistanceTextView = (TextView) view.findViewById(R.id.start_distance_textview);
+                viewHolder.endDistanceTextView = (TextView) view.findViewById(R.id.end_distance_textview);
                 view.setTag(viewHolder);
             } else {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
-            viewHolder.textView.setText("This is card " + (getItemId(position) + 1));
+            viewHolder.startdistanceTextView.setText("Distance between start " + startDistances.get(position));
+            viewHolder.endDistanceTextView.setText("Distance between ends" + endDistances.get(position));
 
             return view;
         }
 
         private static class ViewHolder {
-            TextView textView;
+            TextView startdistanceTextView;
+            TextView endDistanceTextView;
         }
     }
 }
