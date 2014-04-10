@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/action_set_range"
+        android:icon="@drawable/ic_action_settings"
+        android:title="Set search range"
+        app:showAsAction="always" />
+
     <item android:id="@+id/refresh_carpool_database"
         android:icon="@drawable/icon_refresh"
         android:title="Refresh"
-        app:showAsAction="always"/> />
+        app:showAsAction="ifRoom"/>
 </menu>
