@@ -1,9 +1,12 @@
 package in.osc.carpool;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.media.audiofx.BassBoost;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -16,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -107,6 +111,32 @@ public class CarpoolSearchFragment extends Fragment {
 
         if(item.getItemId() == R.id.refresh_carpool_database) {
             new RefreshCarpoolDatabase().execute();
+            return true;
+        }
+
+        if (item.getItemId() == R.id.action_set_range) {
+            final SeekBar sb;
+            LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View layout = inflater.inflate(R.layout.dialog_set_range, null);
+            sb = (SeekBar)layout.findViewById(R.id.seekbar_set_range);
+            final SharedPreferences settings = getActivity().getSharedPreferences("MAIN", 0);
+            int progress = settings.getInt("SEARCH_RANGE", 0);
+            sb.setProgress(progress);
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+                    .setView(layout);
+
+            builder.setPositiveButton("Update Range", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog,int id) {
+                    int progress = sb.getProgress();
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putInt("SEARCH_RANGE", progress);
+                    editor.commit();
+                    Toast.makeText(getActivity(), "Range changed to " + (((float) progress) / 10.0f ) , Toast.LENGTH_SHORT).show();
+                }
+            });
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+
         }
 
         return super.onOptionsItemSelected(item);
