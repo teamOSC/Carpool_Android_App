@@ -1,14 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent" >
 
-<ListView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/googlecards_listview"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#e2e2e2"
-    android:clipToPadding="false"
-    android:divider="@null"
-    android:dividerHeight="16dp"
-    android:fadingEdge="none"
-    android:padding="16dp"
-    android:layout_marginTop="5dp"
-    android:scrollbarStyle="outsideOverlay" />
+    <TextView
+        android:id="@+id/title_carpool"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="2dp"
+        android:textSize="20sp"
+        android:text="Available Carpools" />
+
+    <ListView
+        android:id="@+id/googlecards_listview"
+        android:layout_below="@id/title_carpool"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#e2e2e2"
+        android:clipToPadding="false"
+        android:divider="@null"
+        android:dividerHeight="16dp"
+        android:fadingEdge="none"
+        android:padding="16dp"
+        android:layout_marginTop="5dp"
+        android:scrollbarStyle="outsideOverlay" />
+
+</RelativeLayout>
+

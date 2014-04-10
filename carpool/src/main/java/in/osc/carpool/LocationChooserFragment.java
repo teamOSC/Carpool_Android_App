@@ -6,8 +6,12 @@ import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -26,6 +30,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -39,6 +46,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.net.URI;
@@ -51,7 +59,10 @@ import in.osc.carpool.utils.UserEmailFetcher;
 /**
  * Created by omerjerk on 5/1/14.
  */
-public class LocationChooserFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class LocationChooserFragment extends Fragment implements
+        LoaderManager.LoaderCallbacks<Cursor>,
+        GooglePlayServicesClient.ConnectionCallbacks,
+        GooglePlayServicesClient.OnConnectionFailedListener{
 
     private static View rootView;
     private GoogleMap mMap;
@@ -59,6 +70,9 @@ public class LocationChooserFragment extends Fragment implements LoaderManager.L
     private String start_lat = "", start_lon = "", dest_lat = "", dest_lon = "";
 
     private Context context;
+
+    LocationClient mLocationClient;
+    Location mCurrentLocation;
 
     private static final String TAG = "LocationChooserFragment";
     /**
@@ -107,6 +121,14 @@ public class LocationChooserFragment extends Fragment implements LoaderManager.L
                 new LocationConfirmDialogFragment(point, userEmail).show(getActivity().getSupportFragmentManager(), "LocationConfirmDialog");
             }
         });
+
+        Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        criteria.setPowerRequirement(Criteria.POWER_LOW);
+
+        mLocationClient = new LocationClient(context, this, this);
+
+        mLocationClient.connect();
         return rootView;
     }
 
@@ -198,6 +220,40 @@ public class LocationChooserFragment extends Fragment implements LoaderManager.L
         }
     }
 
+    @Override
+    public void onConnected(Bundle bundle) {
+        Log.d(TAG, "CONNECTED");
+        mCurrentLocation = mLocationClient.getLastLocation();
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                LatLng tempLatLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(tempLatLng, 13.0f));
+            }
+        });
+    }
+
+    @Override
+    public void onDisconnected() {
+        Log.d(TAG, "DISCONNECTED");
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.d(TAG, "CONNECTION FAILED");
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        mLocationClient.disconnect();
+        super.onStop();
+    }
+
     public class LocationConfirmDialogFragment extends DialogFragment {
 
         LatLng point;
@@ -238,7 +294,6 @@ public class LocationChooserFragment extends Fragment implements LoaderManager.L
                     @Override
                     protected Void doInBackground(Void... voids) {
                         try{
-
                             //make an http get request
                             HttpClient client = new DefaultHttpClient();
                             String uri = "http://162.243.238.19:5000/add?";

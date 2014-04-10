@@ -200,7 +200,7 @@ public class CarpoolSearchFragment extends Fragment {
             String result = "";
             try {
                 HttpClient client = new DefaultHttpClient();
-                String uri = "http://162.243.238.19/sauravtom/carpool.json";
+                String uri = "http://tosc.in/sauravtom/carpool.json";
                 URI website = new URI(uri);
                 HttpGet request = new HttpGet();
                 request.setURI(website);
@@ -257,6 +257,7 @@ public class CarpoolSearchFragment extends Fragment {
         private List<Float> endDistances;
         private List<JSONObject> dataList;
 
+
         public GoogleCardsAdapter(Context context, List<Float> startDistances, List<Float> endDistances, List<JSONObject> dataList) {
             mContext = context;
             this.startDistances = startDistances;
@@ -296,7 +297,7 @@ public class CarpoolSearchFragment extends Fragment {
             }
 
             viewHolder.startdistanceTextView.setText("Diff b/w start : " + startDistances.get(position) + " km");
-            viewHolder.endDistanceTextView.setText("Diff b/w start : " + endDistances.get(position) + " km");
+            viewHolder.endDistanceTextView.setText("Diff b/w end : " + endDistances.get(position) + " km");
             try {
                 viewHolder.emailTextView.setText("Email : " + dataList.get(position).getString("email"));
             } catch (JSONException e) {
