@@ -19,7 +19,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Set;
@@ -99,14 +102,7 @@ public class NavigationDrawerFragment extends Fragment {
                 selectItem(position);
             }
         });
-        mDrawerListView.setAdapter(new ArrayAdapter<String>(
-                getActionBar().getThemedContext(),
-                android.R.layout.simple_list_item_1,
-                android.R.id.text1,
-                new String[]{
-                        "Set Home/Destination",
-                        "Search for carpool"
-                }));
+        mDrawerListView.setAdapter(new NavigationDrawerAdapter());
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
         return mDrawerListView;
     }
@@ -274,5 +270,57 @@ public class NavigationDrawerFragment extends Fragment {
          * Called when an item in the navigation drawer is selected.
          */
         void onNavigationDrawerItemSelected(int position);
+    }
+
+    private class NavigationDrawerAdapter extends BaseAdapter {
+
+        @Override
+        public int getCount() {
+            return 2;
+        }
+
+        @Override
+        public Object getItem(int i) {
+            return null;
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return i;
+        }
+
+        @Override
+        public View getView(int i, View convertView, ViewGroup viewGroup) {
+
+            ViewHolder view;
+            LayoutInflater inflater = getActivity().getLayoutInflater();
+
+            if (convertView == null) {
+                view = new ViewHolder();
+                convertView = inflater.inflate(R.layout.row_navigation_drawer, null);
+                view.icon = (ImageView) convertView.findViewById(R.id.icon_item_drawer);
+                view.text = (TextView) convertView.findViewById(R.id.text_item_drawer);
+                convertView.setTag(view);
+            } else {
+                view = (ViewHolder) convertView.getTag();
+            }
+            switch (i) {
+                case 0 :
+                    view.icon.setImageResource(R.drawable.ic_location);
+                    view.text.setText("Set Home/Destination");
+                    break;
+                case 1 :
+                    view.icon.setImageResource(R.drawable.ic_car);
+                    view.text.setText("Search for Carpool");
+                    break;
+                default: break; // We should never reach here
+            }
+            return convertView;
+        }
+    }
+
+    public static class ViewHolder {
+        ImageView icon;
+        TextView text;
     }
 }

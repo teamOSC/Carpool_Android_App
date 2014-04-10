@@ -4,5 +4,5 @@
     android:layout_height="match_parent"
     android:choiceMode="singleChoice"
     android:dividerHeight="2dp"
-    android:background="#cccc"
+    android:background="#fff"
     tools:context="in.osc.carpool.NavigationDrawerFragment" />
