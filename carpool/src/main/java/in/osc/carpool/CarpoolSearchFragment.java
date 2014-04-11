@@ -171,6 +171,9 @@ public class CarpoolSearchFragment extends Fragment {
                         Location.distanceBetween(Double.parseDouble(friendDestPos[0]),
                                 Double.parseDouble(friendDestPos[1]),
                                 homeDestLat, homeDestLon, distanceBetweenDest);
+                        if (distanceBetweenStart[0] < 10 && distanceBetweenDest[0] < 10) {
+                            //TODO: Move these two below lines inside this if block
+                        }
                         startDistances.add(distanceBetweenStart[0] / 1000);
                         endDistances.add(distanceBetweenDest[0]/1000);
                         Log.d(TAG, "distanceBetweenStart = " + distanceBetweenStart[0]/1000 + " km");

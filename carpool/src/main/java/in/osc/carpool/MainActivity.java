@@ -113,11 +113,12 @@ public class MainActivity extends ActionBarActivity
 
     private void handleIntent(Intent intent) {
 
-        LocationChooserFragment mLocationChooserFragment = (LocationChooserFragment) getSupportFragmentManager().findFragmentById(R.id.container);
+        LocationChooserFragment mLocationChooserFragment;
         if (intent.getAction().equals(Intent.ACTION_SEARCH)) {
-            String query = intent.getStringExtra(SearchManager.QUERY);
+            mLocationChooserFragment = (LocationChooserFragment) getSupportFragmentManager().findFragmentById(R.id.container);
             mLocationChooserFragment.performSearch(intent.getStringExtra(SearchManager.QUERY));
         } else if (intent.getAction().equals(Intent.ACTION_VIEW)) {
+            mLocationChooserFragment = (LocationChooserFragment) getSupportFragmentManager().findFragmentById(R.id.container);
             mLocationChooserFragment.getPlace(intent.getStringExtra(SearchManager.EXTRA_DATA_KEY));
         }
     }
