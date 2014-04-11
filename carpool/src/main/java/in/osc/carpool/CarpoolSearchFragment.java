@@ -329,6 +329,23 @@ public class CarpoolSearchFragment extends Fragment {
         LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View layout = inflater.inflate(R.layout.dialog_set_range, null);
         sb = (SeekBar)layout.findViewById(R.id.seekbar_set_range);
+        final TextView rangeText = (TextView) layout.findViewById(R.id.text_range);
+        sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                rangeText.setText(Float.valueOf(((float) i) / 10.0f) + " km");
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
         final SharedPreferences settings = getActivity().getSharedPreferences("MAIN", 0);
         int progress = settings.getInt("SEARCH_RANGE", 0);
         sb.setProgress(progress);

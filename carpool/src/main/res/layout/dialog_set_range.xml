@@ -13,4 +13,12 @@
         android:layout_centerVertical="true"
         android:max="100"/>
 
+    <TextView
+        android:id="@+id/text_range"
+        android:layout_below="@id/seekbar_set_range"
+        android:layout_marginTop="13dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"/>
+
 </RelativeLayout>
