@@ -110,7 +110,13 @@ public class CarpoolSearchFragment extends Fragment {
 
 
         if(item.getItemId() == R.id.refresh_carpool_database) {
-            new RefreshCarpoolDatabase().execute();
+            new RefreshCarpoolDatabase() {
+                @Override
+                protected void onPostExecute(String result) {
+                    super.onPostExecute(result);
+                    new CalculateCarpools().execute();
+                }
+            }.execute();
             return true;
         }
 
