@@ -133,6 +133,7 @@ public class CarpoolSearchFragment extends Fragment {
 
         List<Float> startDistances = new ArrayList<Float>();
         List<Float> endDistances = new ArrayList<Float>();
+        List<String> emailList = new ArrayList<String>();
         ArrayList<JSONObject> dataList = new ArrayList<JSONObject>();
 
         @Override
@@ -172,10 +173,10 @@ public class CarpoolSearchFragment extends Fragment {
                                 Double.parseDouble(friendDestPos[1]),
                                 homeDestLat, homeDestLon, distanceBetweenDest);
                         if (distanceBetweenStart[0] < 10 && distanceBetweenDest[0] < 10) {
-                            //TODO: Move these two below lines inside this if block
+                            startDistances.add(distanceBetweenStart[0] / 1000);
+                            endDistances.add(distanceBetweenDest[0]/1000);
+                            emailList.add(mJSONObject.getString("email"));
                         }
-                        startDistances.add(distanceBetweenStart[0] / 1000);
-                        endDistances.add(distanceBetweenDest[0]/1000);
                         Log.d(TAG, "distanceBetweenStart = " + distanceBetweenStart[0]/1000 + " km");
                         Log.d(TAG, "distanceBetweenDest = " + distanceBetweenDest[0]/1000 + " km");
                     }
@@ -198,7 +199,7 @@ public class CarpoolSearchFragment extends Fragment {
         protected void onPostExecute (Void v) {
             ListView cardsList = (ListView) rootView.findViewById(R.id.googlecards_listview);
             SwingBottomInAnimationAdapter swingBottomInAnimationAdapter =
-                    new SwingBottomInAnimationAdapter(new GoogleCardsAdapter(getActivity(), startDistances, endDistances, dataList));
+                    new SwingBottomInAnimationAdapter(new GoogleCardsAdapter(getActivity(), startDistances, endDistances, emailList));
             swingBottomInAnimationAdapter.setInitialDelayMillis(300);
             swingBottomInAnimationAdapter.setAbsListView(cardsList);
             cardsList.setAdapter(swingBottomInAnimationAdapter);
@@ -268,14 +269,14 @@ public class CarpoolSearchFragment extends Fragment {
         private Context mContext;
         private List<Float> startDistances;
         private List<Float> endDistances;
-        private List<JSONObject> dataList;
+        private List<String> emailList;
 
 
-        public GoogleCardsAdapter(Context context, List<Float> startDistances, List<Float> endDistances, List<JSONObject> dataList) {
+        public GoogleCardsAdapter(Context context, List<Float> startDistances, List<Float> endDistances, List<String> emailList) {
             mContext = context;
             this.startDistances = startDistances;
             this.endDistances = endDistances;
-            this.dataList = dataList;
+            this.emailList = emailList;
         }
 
         @Override
@@ -290,7 +291,7 @@ public class CarpoolSearchFragment extends Fragment {
 
         @Override
         public int getCount () {
-            return startDistances.size();
+            return startDistances.size() != 0 ? startDistances.size() : 1;
         }
 
         @Override
@@ -309,12 +310,16 @@ public class CarpoolSearchFragment extends Fragment {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
-            viewHolder.startdistanceTextView.setText("Diff b/w start : " + startDistances.get(position) + " km");
-            viewHolder.endDistanceTextView.setText("Diff b/w end : " + endDistances.get(position) + " km");
-            try {
-                viewHolder.emailTextView.setText("Email : " + dataList.get(position).getString("email"));
-            } catch (JSONException e) {
-                e.printStackTrace();
+            if (getCount() == 0) {
+                viewHolder.startdistanceTextView.setText("We couldn't find any carpool near your location. You try to update the range.");
+                return view;
+            }
+            if (this.startDistances.size() != 0) {
+                viewHolder.startdistanceTextView.setText("Start Diff : " + startDistances.get(position) + " km");
+                viewHolder.endDistanceTextView.setText("End Diff : " + endDistances.get(position) + " km");
+                viewHolder.emailTextView.setText("Email : " + emailList.get(position));
+            } else {
+                viewHolder.startdistanceTextView.setText("Sorry, we couldn't find any carpool around your place.");
             }
 
             return view;

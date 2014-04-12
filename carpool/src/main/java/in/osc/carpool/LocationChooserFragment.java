@@ -72,7 +72,7 @@ public class LocationChooserFragment extends Fragment implements
     private Context context;
 
     LocationClient mLocationClient;
-    Location mCurrentLocation;
+    Location mCurrentLocation = null;
 
     private static final String TAG = "LocationChooserFragment";
     /**
@@ -224,13 +224,15 @@ public class LocationChooserFragment extends Fragment implements
     public void onConnected(Bundle bundle) {
         Log.d(TAG, "CONNECTED");
         mCurrentLocation = mLocationClient.getLastLocation();
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                LatLng tempLatLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(tempLatLng, 13.0f));
-            }
-        });
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    LatLng tempLatLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(tempLatLng, 13.0f));
+                }
+            });
+        }
     }
 
     @Override
